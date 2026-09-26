@@ -12,11 +12,18 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       await register(name, email, password);
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.message && err.message.includes('Network Error')) {
+        setError('Cannot connect to server. The server might be sleeping or CORS blocked.');
+      } else {
+        setError(err.message || 'Registration failed');
+      }
     }
   };
 

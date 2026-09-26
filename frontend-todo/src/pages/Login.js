@@ -11,11 +11,18 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       await login(email, password);
       navigate('/todos');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.message && err.message.includes('Network Error')) {
+        setError('Cannot connect to server. The server might be sleeping or CORS blocked.');
+      } else {
+        setError(err.message || 'Login failed');
+      }
     }
   };
 

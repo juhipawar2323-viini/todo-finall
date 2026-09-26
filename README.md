@@ -143,11 +143,37 @@ npm start
 
 The frontend will run at `http://localhost:3000` and the backend will run at `http://localhost:5000`.
 
-## Render and Vercel deployment
+## Render and Vercel Deployment Guide
 
-On **Render**, set `FRONTEND_URLS` to the full Vercel site URL (for example, `https://todos-app-pearl-beta.vercel.app`) and redeploy the backend. Do not include a trailing slash.
+### Backend on Render (`todo-finall.onrender.com`)
+1. Go to your Render Dashboard -> Select your Web Service (`todo-finall`).
+2. Go to **Environment** tab and ensure the following variables are set:
+   - `PORT`: `5000` (or leave default, Render sets `PORT` automatically)
+   - `SUPABASE_URL`: `https://wicascsluggzcvynzvom.supabase.co`
+   - `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase Service Role secret key (or Anon key)
+   - `JWT_SECRET`: A secure random secret string for JWT signing
+   - `FRONTEND_URLS`: `https://frontend-todo-sandy.vercel.app,http://localhost:3000`
+3. Click **Save Changes** and **Manual Deploy** -> **Deploy latest commit**.
+4. Check health by visiting: `https://todo-finall.onrender.com/api/health`
+   You should see:
+   ```json
+   {
+     "success": true,
+     "message": "Todo API is running",
+     "database": {
+       "status": "connected",
+       "message": "Successfully queried Supabase users table"
+     }
+   }
+   ```
 
-On **Vercel**, set `REACT_APP_API_URL` to the Render backend origin (for example, `https://todos-app-8za0.onrender.com`) and redeploy the frontend. Do not append `/api`, because the frontend already includes `/api` in each request path.
+### Frontend on Vercel (`frontend-todo-sandy.vercel.app`)
+1. Go to your Vercel Dashboard -> Select project (`frontend-todo`).
+2. Go to **Settings** -> **Environment Variables**.
+3. Set or update:
+   - `REACT_APP_API_URL`: `https://todo-finall.onrender.com` (do NOT append `/api`).
+4. Trigger a **Redeploy** on Vercel so the frontend picks up the environment variable.
+
 
 ## API Documentation
 

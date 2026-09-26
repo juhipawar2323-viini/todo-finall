@@ -1,9 +1,15 @@
 import axios from 'axios';
 
-// Keep the API location configurable while preserving a safe production
-// fallback for deployments where Vercel has not been given the variable yet.
-const API_URL = (process.env.REACT_APP_API_URL || 'https://todos-app-8za0.onrender.com')
+let rawUrl = (process.env.REACT_APP_API_URL || 'https://todo-finall.onrender.com')
+  .trim()
   .replace(/\/$/, '');
+
+// If the user appended /api to the base URL, strip it to prevent duplicate /api/api/...
+if (rawUrl.endsWith('/api')) {
+  rawUrl = rawUrl.slice(0, -4);
+}
+
+const API_URL = rawUrl;
 
 const api = axios.create({
   baseURL: API_URL,
