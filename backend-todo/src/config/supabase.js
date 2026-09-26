@@ -4,21 +4,14 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const supabaseUrl = (process.env.SUPABASE_URL || '').trim().replace(/\/$/, '');
-const supabaseKey = (
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.SUPABASE_KEY ||
-  process.env.SUPABASE_ANON_KEY ||
-  ''
-).trim();
+const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
 
 if (!supabaseUrl || !supabaseKey) {
-  console.warn('⚠️ WARNING: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing in environment variables.');
+  throw new Error('Supabase is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on the backend.');
 }
 
-const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseKey || 'placeholder'
-);
+// This API uses custom JWT authentication, so all database access happens
+// server-side with the service-role key. Never use an anon key here.
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 module.exports = supabase;
-

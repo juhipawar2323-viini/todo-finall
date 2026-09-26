@@ -9,6 +9,11 @@ const errorHandler = (err, req, res, next) => {
     message = 'Conflict: Duplicate value exists';
   }
 
+  if (err.code === 'PGRST205') {
+    statusCode = 503;
+    message = 'Database schema is not ready. Run supabase_schema.sql in the Supabase project configured by SUPABASE_URL, then retry.';
+  }
+
   res.status(statusCode).json({
     success: false,
     message: message,

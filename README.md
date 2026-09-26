@@ -149,13 +149,13 @@ The frontend will run at `http://localhost:3000` and the backend will run at `ht
 1. Go to your Render Dashboard -> Select your Web Service (`todo-finall`).
 2. Go to **Environment** tab and ensure the following variables are set:
    - `PORT`: `5000` (or leave default, Render sets `PORT` automatically)
-   - `SUPABASE_URL`: `https://wicascsluggzcvynzvom.supabase.co`
-   - `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase Service Role secret key (or Anon key)
+   - `SUPABASE_URL`: the URL of the exact Supabase project where you ran `supabase_schema.sql`. Do not copy an old project URL from this README or another deployment.
+   - `SUPABASE_SERVICE_ROLE_KEY`: the **Service Role** key from that same Supabase project. Do not use the anon/publishable key.
    - `JWT_SECRET`: A secure random secret string for JWT signing
    - `FRONTEND_URLS`: `https://frontend-todo-sandy.vercel.app,http://localhost:3000`
 3. Click **Save Changes** and **Manual Deploy** -> **Deploy latest commit**.
 4. Check health by visiting: `https://todo-finall.onrender.com/api/health`
-   You should see:
+   You should see `database.status: "connected"`, and both `database.tables.users` and `database.tables.todos` should be `"connected"`.
    ```json
    {
      "success": true,

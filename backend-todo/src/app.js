@@ -30,19 +30,17 @@ app.use(cors({
 
     const cleanOrigin = origin.replace(/\/$/, '');
 
-    // Allow vercel preview/prod domains, localhost, or explicit origins
+    // Allow only configured browser origins. Add every Vercel domain to FRONTEND_URLS.
     if (
       allowedOrigins.includes(cleanOrigin) ||
       allowedOrigins.includes('*') ||
-      cleanOrigin.endsWith('.vercel.app') ||
       cleanOrigin.includes('localhost') ||
       cleanOrigin.includes('127.0.0.1')
     ) {
       return callback(null, true);
     }
 
-    // Allow origin dynamically so CORS preflight never fails with a 500 error
-    return callback(null, true);
+    return callback(new Error(`CORS origin not allowed: ${cleanOrigin}`));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -71,17 +69,23 @@ app.use('/api/todos', todoRoutes);
 app.get('/api/health', async (req, res) => {
   let dbStatus = 'checking';
   let dbMessage = '';
+  let tables = {};
   try {
-    const { error } = await supabase
-      .from('users')
-      .select('count', { count: 'exact', head: true });
+    const results = await Promise.all(['users', 'todos'].map(async (table) => {
+      const { error } = await supabase
+        .from(table)
+        .select('count', { count: 'exact', head: true });
+      return [table, error ? error.message : 'connected'];
+    }));
+    tables = Object.fromEntries(results);
+    const failedTable = results.find(([, status]) => status !== 'connected');
 
-    if (error) {
+    if (failedTable) {
       dbStatus = 'error';
-      dbMessage = error.message;
+      dbMessage = `${failedTable[0]} table: ${failedTable[1]}`;
     } else {
       dbStatus = 'connected';
-      dbMessage = 'Successfully queried Supabase users table';
+      dbMessage = 'Successfully queried Supabase users and todos tables';
     }
   } catch (err) {
     dbStatus = 'error';
@@ -94,6 +98,7 @@ app.get('/api/health', async (req, res) => {
     database: {
       status: dbStatus,
       message: dbMessage,
+      tables,
       supabaseUrl: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.replace(/\/$/, '') : 'NOT_SET'
     }
   });
@@ -104,4 +109,3 @@ app.use(notFound);
 app.use(errorHandler);
 
 module.exports = app;
-
